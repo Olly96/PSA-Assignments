@@ -1,18 +1,8 @@
-/**
- * Original code:
- * Copyright © 2000–2017, Robert Sedgewick and Kevin Wayne.
- * <p>
- * Modifications:
- * Copyright (c) 2017. Phasmid Software
- */
 package edu.neu.coe.info6205.union_find;
 
 import java.util.Arrays;
 
-/**
- * Height-weighted Quick Union with Path Compression
- */
-public class UF_HWQUPC implements UF {
+public class UF_HWQUPC_TwoPass implements  UF {
     /**
      * Ensure that site p is connected to site q,
      *
@@ -33,7 +23,7 @@ public class UF_HWQUPC implements UF {
      * @param pathCompression whether to use path compression
      * @throws IllegalArgumentException if {@code n < 0}
      */
-    public UF_HWQUPC(int n, boolean pathCompression) {
+    public UF_HWQUPC_TwoPass(int n, boolean pathCompression) {
         count = n;
         parent = new int[n];
         height = new int[n];
@@ -53,7 +43,7 @@ public class UF_HWQUPC implements UF {
      * @param n the number of sites
      * @throws IllegalArgumentException if {@code n < 0}
      */
-    public UF_HWQUPC(int n) {
+    public UF_HWQUPC_TwoPass(int n) {
         this(n, true);
     }
 
@@ -81,13 +71,20 @@ public class UF_HWQUPC implements UF {
      */
     public int find(int p) {
         validate(p);
+        int rootNode;
+        int q = p;
         while(p != parent[p]){
-            if(pathCompression){
-                doPathCompression(p);
-            }
             p = parent[p];
         }
-        return p;
+        rootNode = p;
+        if(pathCompression){
+            while(q != parent[q]){
+                int temp = parent[q];
+                parent[q] = rootNode;
+                q = temp;
+            }
+        }
+        return rootNode;
     }
 
     /**
@@ -182,11 +179,5 @@ public class UF_HWQUPC implements UF {
             parent[q] = p; height[p] += height[q];
         }
     }
-
-    /**
-     * This implements the single-pass path-halving mechanism of path compression
-     */
-    private void doPathCompression(int i) {
-        parent[i] = parent[parent[i]];
-    }
 }
+

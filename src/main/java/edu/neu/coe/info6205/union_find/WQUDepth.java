@@ -1,18 +1,10 @@
-/**
- * Original code:
- * Copyright © 2000–2017, Robert Sedgewick and Kevin Wayne.
- * <p>
- * Modifications:
- * Copyright (c) 2017. Phasmid Software
- */
 package edu.neu.coe.info6205.union_find;
 
+import java.time.Clock;
 import java.util.Arrays;
 
-/**
- * Height-weighted Quick Union with Path Compression
- */
-public class UF_HWQUPC implements UF {
+public class WQUDepth implements UF{
+
     /**
      * Ensure that site p is connected to site q,
      *
@@ -33,13 +25,13 @@ public class UF_HWQUPC implements UF {
      * @param pathCompression whether to use path compression
      * @throws IllegalArgumentException if {@code n < 0}
      */
-    public UF_HWQUPC(int n, boolean pathCompression) {
+    public WQUDepth(int n, boolean pathCompression) {
         count = n;
         parent = new int[n];
-        height = new int[n];
+        depth = new int[n];
         for (int i = 0; i < n; i++) {
             parent[i] = i;
-            height[i] = 1;
+            depth[i] = 1;
         }
         this.pathCompression = pathCompression;
     }
@@ -53,14 +45,17 @@ public class UF_HWQUPC implements UF {
      * @param n the number of sites
      * @throws IllegalArgumentException if {@code n < 0}
      */
-    public UF_HWQUPC(int n) {
+    public WQUDepth(int n) {
         this(n, true);
     }
 
     public void show() {
-        for (int i = 0; i < parent.length; i++) {
-            System.out.printf("%d: %d, %d\n", i, parent[i], height[i]);
-        }
+        System.out.println(Arrays.toString(parent));
+        System.out.println(Arrays.toString(depth));
+//
+//        for (int i = 0; i < parent.length; i++) {
+//            System.out.printf("%d: %d, %d\n", i, parent[i], depth[i]);
+//        }
     }
 
     /**
@@ -138,7 +133,7 @@ public class UF_HWQUPC implements UF {
         return "UF_HWQUPC:" + "\n  count: " + count +
                 "\n  path compression? " + pathCompression +
                 "\n  parents: " + Arrays.toString(parent) +
-                "\n  heights: " + Arrays.toString(height);
+                "\n  heights: " + Arrays.toString(depth);
     }
 
     // validate that p is a valid index
@@ -153,9 +148,9 @@ public class UF_HWQUPC implements UF {
         parent[p] = x;
     }
 
-    private void updateHeight(int p, int x) {
-        height[p] += height[x];
-    }
+//    private void updateHeight(int p, int x) {
+//        depth[p] += height[x];
+//    }
 
     /**
      * Used only by testing code
@@ -168,18 +163,22 @@ public class UF_HWQUPC implements UF {
     }
 
     private final int[] parent;   // parent[i] = parent of i
-    private final int[] height;   // height[i] = height of subtree rooted at i
+    private final int[] depth;   // depth[i] = depth of subtree rooted at i
     private int count;  // number of components
     private boolean pathCompression;
 
     private void mergeComponents(int p, int q) {
+
         if(p == q){
             return;
         }
-        if  (height[p] < height[q]) {
-            parent[p] = q; height[q] += height[p];
+        if  (depth[p] < depth[q]) {
+            parent[p] = q;
+        } else if(depth[p] > depth[q]){
+            parent[q] = p;
         } else{
-            parent[q] = p; height[p] += height[q];
+            parent[q] = p;
+            depth[p] += 1;
         }
     }
 
